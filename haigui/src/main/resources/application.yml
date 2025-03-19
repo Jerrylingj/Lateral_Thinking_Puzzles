@@ -1,0 +1,23 @@
+# ????
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+# ?????
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306
+    username: root
+    password: 284347Qa.
+# ????
+knife4j:
+  enable: true
+  openapi:
+    title: ????
+    group:
+      default:
+        group-name: ????
+        api-rule: package
+        api-rule-resources:
+          - com.haigui.haigui.controller
