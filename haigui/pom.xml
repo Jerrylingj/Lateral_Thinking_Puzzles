@@ -114,6 +114,15 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<!--配置Mockito Agent-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version> <!-- 或更高版本 -->
+				<configuration>
+					<argLine>-javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar"</argLine>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
