@@ -10,6 +10,8 @@ spring:
     url: jdbc:mysql://localhost:3306
     username: root
     password: 284347Qa.
+  profiles:
+    active: local
 # ????
 knife4j:
   enable: true

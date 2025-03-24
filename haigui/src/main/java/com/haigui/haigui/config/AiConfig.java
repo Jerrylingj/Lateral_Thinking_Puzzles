@@ -17,8 +17,8 @@ import java.util.concurrent.TimeUnit;
 @ConfigurationProperties(prefix = "ai")
 @Data
 public class AiConfig {
-    // 读取配置中的apikey
-    @Value("${ai.apiKey}")
+//    // 读取配置中的apikey
+//    @Value("${ai.apiKey}")
     private String apiKey;
 
     /**
