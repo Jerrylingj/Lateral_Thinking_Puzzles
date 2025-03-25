@@ -1,7 +1,6 @@
 <!-- src/views/HomeView.vue -->
 <template>
     <a-layout class="container">
-      <a-page-header title="AI 海龟汤" />
       <a-layout-content class="content">
         <a-button type="primary" size="large" @click="startNewGame">点击开始</a-button>
       </a-layout-content>
