@@ -13,7 +13,7 @@ import java.util.List;
  * AI 对话接口
  */
 @RestController
-@RequestMapping("/api/chat") // 统一接口前缀
+@RequestMapping("/chat") // 统一接口前缀
 public class ChatController {
 
     @Resource
