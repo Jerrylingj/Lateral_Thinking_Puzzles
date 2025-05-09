@@ -5,9 +5,9 @@ import com.haigui.haigui.model.ChatRoom;
 import com.haigui.haigui.service.ChatService;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessage;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +27,7 @@ public class ChatServiceImpl implements ChatService {
         System.out.println("[Room {" + roomId + "}] 玩家: {" + message + "}");
         List<ChatMessage> messages = new ArrayList<>();
         // 系统预设
-        String systemPrompt  =
-                "恐怖海龟汤AI主持规则▎核心定位\n" +
+        String systemPrompt = "恐怖海龟汤AI主持规则▎核心定位\n" +
                 "⚠ 强制规则 ⚠\n" +
                 "1. 每次仅响应【当前最后一条】玩家提问\n" +
                 "2. 输出必须为单轮对话（禁止连续剧情）\n" +
@@ -44,16 +43,20 @@ public class ChatServiceImpl implements ChatService {
                 "▎压缩策略\n" +
                 "1. 用符号系统代替文字描述（⚠=禁止 ▷=引导触发）\n" +
                 "2. 合并同类机制（将「逻辑校验」与「恐怖要素」绑定）\n" +
-                "| 阶段       | 格式模板                              | 示例                                                         |\n" +
-                "| ---------- | ------------------------------------- | ------------------------------------------------------------ |\n" +
-                "| 游戏启动   | 「开始游戏 ▏难度 + 情景」             | 「开始游戏 ▏难度：★★★★☆ 情景：游乐园午夜12点，小丑玩偶眼眶渗出机油，过山车上发现失踪者手握断线控制器」 |\n" +
+                "| 阶段       | 格式模板                              | 示例                                                         |\n"
+                +
+                "| ---------- | ------------------------------------- | ------------------------------------------------------------ |\n"
+                +
+                "| 游戏启动   | 「开始游戏 ▏难度 + 情景」             | 「开始游戏 ▏难度：★★★★☆ 情景：游乐园午夜12点，小丑玩偶眼眶渗出机油，过山车上发现失踪者手握断线控制器」 |\n"
+                +
                 "| 确认「是」 | 是！([物理参数])进度[数值]% ▶[梯度词] | 是！(液压压力<2MPa)60% ▶金属疲劳声                           |\n" +
                 "| 否定「否」 | 否！([反证据]) ▶[阻碍词]              | 否！(无无线模块)40% ▶齿轮卡顿                              |\n" +
                 "| 部分正确   | 部分正确！▷引导提示                   | 部分正确！▷注意关注【xxx】和【xxx】的关联！                   |\n" +
                 "| 不相关     | 不相关！当前锁定[核心机制]            | 不想管！焦点为【液压传动】                                   |\n" +
                 "| 结束游戏   | 游戏结束，汤底揭晓：完整汤底逻辑链    | 游戏结束，汤底揭晓：                                          |\n";
 
-        final ChatMessage systemMessage = ChatMessage.builder().role(ChatMessageRole.SYSTEM).content(systemPrompt).build();
+        final ChatMessage systemMessage = ChatMessage.builder().role(ChatMessageRole.SYSTEM).content(systemPrompt)
+                .build();
         final ChatMessage userMessage = ChatMessage.builder().role(ChatMessageRole.USER).content(message).build();
 
         if (message.equals("开始游戏") && !globalChatMessagesMap.containsKey(roomId)) {
@@ -62,13 +65,12 @@ public class ChatServiceImpl implements ChatService {
             messages.add(systemMessage);
         } else if (globalChatMessagesMap.containsKey(roomId)) {
             // 非首次开始
-            messages=globalChatMessagesMap.get(roomId);
+            messages = globalChatMessagesMap.get(roomId);
         } else {
-            return "请不要输入无关信息哟 ~ 快点 “开始游戏” 吧！";
+            return "请不要输入无关信息哟 ~ 快点 \"开始游戏\" 吧！";
         }
         globalChatMessagesMap.get(roomId).add(userMessage);
         messages.add(userMessage);
-
 
         // 2. 调用AI, 并维护消息记录
         String ans = aiManager.doChat(messages);
@@ -93,8 +95,35 @@ public class ChatServiceImpl implements ChatService {
             room.setRoomId(roomIdMessageListEntry.getKey());
             room.setChatMessageList(roomIdMessageListEntry.getValue());
             chatRoomList.add(room);
-        };
+        }
 
         return chatRoomList;
+    }
+
+    @Override
+    public boolean deleteChatRoom(long roomId) {
+        // 如果房间存在，删除它并返回true
+        if (globalChatMessagesMap.containsKey(roomId)) {
+            globalChatMessagesMap.remove(roomId);
+            System.out.println("[Room " + roomId + "] 已删除");
+            return true;
+        }
+
+        // 房间不存在，返回false
+        return false;
+    }
+
+    @Override
+    public ChatRoom getChatRoom(long roomId) {
+        // 如果房间存在，构建并返回ChatRoom对象
+        if (globalChatMessagesMap.containsKey(roomId)) {
+            ChatRoom room = new ChatRoom();
+            room.setRoomId(roomId);
+            room.setChatMessageList(globalChatMessagesMap.get(roomId));
+            return room;
+        }
+
+        // 房间不存在，返回null
+        return null;
     }
 }

@@ -1,9 +1,9 @@
-# ????
+# 服务器配置
 server:
   port: 3000
   servlet:
     context-path: /api
-# ?????
+# 数据库配置
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,14 +12,17 @@ spring:
     password: 284347Qa.
   profiles:
     active: local
-# ????
+# AI配置
+ai:
+  apiKey: 0d08d444-b650-4715-997a-15e4cf0a5f4f
+# 接口文档
 knife4j:
   enable: true
   openapi:
-    title: ????
+    title: 接口文档
     group:
       default:
-        group-name: ????
+        group-name: 默认分组
         api-rule: package
         api-rule-resources:
           - com.haigui.haigui.controller

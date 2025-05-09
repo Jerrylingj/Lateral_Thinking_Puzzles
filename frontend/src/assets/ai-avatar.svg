@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- 背景 -->
+  <circle cx="50" cy="50" r="48" fill="url(#grad1)" />
+  
+  <!-- 内部圆形 -->
+  <circle cx="50" cy="50" r="38" fill="#ffffff" opacity="0.95" />
+  
+  <!-- 机器人头像 -->
+  <g transform="translate(26, 23) scale(0.48)">
+    <path d="M64 16C64 7.16 56.84 0 48 0S32 7.16 32 16v15.5C13.9 38.1 0 56.6 0 78.2V128c0 10.5 8.5 19 19 19h62c10.5 0 19-8.5 19-19V78.2c0-21.6-13.9-40.1-32-46.7V16zm34 112c0 6.1-4.9 11-11 11H61v-16c0-17.7-14.3-32-32-32s-32 14.3-32 32v16H19c-6.1 0-11-4.9-11-11V78.2c0-20 13-37.9 32-44.1 1.7-.6 3-2 3-3.8V16c0-2.8 2.2-5 5-5s5 2.2 5 5v14.3c0 1.8 1.3 3.2 3 3.8 19 6.2 32 24.1 32 44.1V128z" fill="#6B8DD6"/>
+  </g>
+  
+  <!-- 渐变定义 -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6B8DD6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8E37D7;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg> 

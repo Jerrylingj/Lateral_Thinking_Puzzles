@@ -1,91 +1,92 @@
 <template>
   <a-config-provider :theme="theme">
-    <a-layout class="app-container">
-      <!-- 顶部导航 -->
-      <a-layout-header class="app-header">
-        <h1 class="app-title">AI 海龟汤</h1>
-      </a-layout-header>
-
-      <!-- 主要内容区域 -->
-      <a-layout-content class="main-content">
-        <router-view />
-      </a-layout-content>
-
-      <!-- 底部信息 -->
-      <a-layout-footer class="app-footer">
-        © 2024 AI海龟汤 版权所有
-      </a-layout-footer>
-    </a-layout>
+    <div class="app-container">
+      <router-view />
+    </div>
   </a-config-provider>
 </template>
 
 <script setup>
-/* import { theme } from 'ant-design-vue/es/default-theme'
+import { ref } from 'vue'
 
 // 全局主题配置
-const theme = {
+const theme = ref({
   token: {
-    colorPrimary: '#1890ff',
+    colorPrimary: '#6B8DD6',
+    colorSuccess: '#4CAF50',
+    colorWarning: '#FF9800',
+    colorError: '#F44336',
+    colorInfo: '#2196F3',
     borderRadius: 8,
+    wireframe: false,
   },
-} */
+})
 </script>
 
-<style scoped>
-.app-container {
-  min-height: 100vh;
-}
-
-.app-header {
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 0 24px;
-}
-
-.app-title {
-  color: rgba(0, 0, 0, 0.85);
-  font-size: 1.5rem;
-  margin: 0;
-  line-height: 64px;
-}
-
-.main-content {
-  padding: 24px;
-  background: #f5f5f5;
-  min-height: calc(100vh - 128px);
-}
-
-.app-footer {
-  text-align: center;
-  background: #fff;
-  padding: 16px 24px;
-  border-top: 1px solid #e8e8e8;
-}
-</style>
-
 <style>
-#app {
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #f6f8fa;
+  color: #333;
+  overflow: hidden;
 }
 
-/* 全局滚动条样式 */
+#app, .app-container {
+  height: 100vh;
+  width: 100%;
+}
+
+/* 统一滚动条样式 */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #f5f5f5;
   border-radius: 4px;
 }
 
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 141, 214, 0.5);
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: rgba(107, 141, 214, 0.8);
+}
+
+/* 输入框聚焦时的效果 */
+input:focus, textarea:focus, button:focus {
+  outline: none;
+}
+
+/* 平滑过渡 */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+/* 动画效果 */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 </style>

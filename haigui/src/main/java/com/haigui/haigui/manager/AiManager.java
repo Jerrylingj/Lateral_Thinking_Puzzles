@@ -6,9 +6,9 @@ import com.volcengine.ark.runtime.model.completion.chat.ChatCompletionRequest;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessage;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
 import com.volcengine.ark.runtime.service.ArkService;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +23,15 @@ public class AiManager {
 
     /**
      * 单句对话, 只允许传入系统预设和用户预设
+     * 
      * @param systemPrompt
      * @param userPrompt
      * @return
      */
     public String doChat(String systemPrompt, String userPrompt) {
         final List<ChatMessage> messages = new ArrayList<>();
-        final ChatMessage systemMessage = ChatMessage.builder().role(ChatMessageRole.SYSTEM).content(systemPrompt).build();
+        final ChatMessage systemMessage = ChatMessage.builder().role(ChatMessageRole.SYSTEM).content(systemPrompt)
+                .build();
         final ChatMessage userMessage = ChatMessage.builder().role(ChatMessageRole.USER).content(userPrompt).build();
         messages.add(systemMessage);
         messages.add(userMessage);
@@ -38,6 +40,7 @@ public class AiManager {
 
     /**
      * 更通用的方法；传入消息列表
+     * 
      * @param chatMessageList
      * @return
      */
@@ -49,7 +52,7 @@ public class AiManager {
                 .messages(chatMessageList)
                 .build();
 
-        List< ChatCompletionChoice> choiceList = arkService.createChatCompletion(chatCompletionRequest)
+        List<ChatCompletionChoice> choiceList = arkService.createChatCompletion(chatCompletionRequest)
                 .getChoices();
         if (CollUtil.isEmpty(choiceList)) {
             throw new RuntimeException("AI没有返回任何内容");
