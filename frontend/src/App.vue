@@ -1,26 +1,15 @@
 <template>
-  <a-config-provider :theme="theme">
-    <div class="app-container">
-      <router-view />
-    </div>
-  </a-config-provider>
+  <div class="app-container">
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
-// 全局主题配置
-const theme = ref({
-  token: {
-    colorPrimary: '#6B8DD6',
-    colorSuccess: '#4CAF50',
-    colorWarning: '#FF9800',
-    colorError: '#F44336',
-    colorInfo: '#2196F3',
-    borderRadius: 8,
-    wireframe: false,
-  },
-})
+// No script needed for this setup
 </script>
 
 <style>
@@ -31,62 +20,62 @@ const theme = ref({
 }
 
 html, body {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* Prevent body scroll */
 }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f6f8fa;
-  color: #333;
-  overflow: hidden;
+  background: #000000;
+  color: #EAEAEA;
 }
 
 #app, .app-container {
-  height: 100vh;
+  height: 100%;
   width: 100%;
 }
 
-/* 统一滚动条样式 */
+/* Dark-themed scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f5f5f5;
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(107, 141, 214, 0.5);
-  border-radius: 4px;
-  transition: all 0.3s;
+  background: #444;
+  border-radius: 6px;
+  transition: background 0.2s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(107, 141, 214, 0.8);
+  background: #666;
 }
 
-/* 输入框聚焦时的效果 */
+/* Global input focus outline */
 input:focus, textarea:focus, button:focus {
   outline: none;
+  box-shadow: 0 0 0 2px rgba(67, 100, 247, 0.4); /* Subtle focus ring matching the theme */
+}
+button:focus {
+  box-shadow: none; /* Buttons have their own focus styles */
 }
 
-/* 平滑过渡 */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s;
+
+/* Global page transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-}
-
-/* 动画效果 */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
 }
 </style>

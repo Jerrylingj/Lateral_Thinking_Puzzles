@@ -1,129 +1,99 @@
 <!-- src/views/ChatView.vue -->
 <template>
-  <div class="chat-container">
+  <div class="chat-view">
     <!-- 顶部导航栏 -->
-    <div class="chat-header">
-      <el-button 
-        type="text" 
-        class="back-button" 
-        @click="$router.push('/')"
-      >
+    <header class="chat-header">
+      <button class="header-btn back-btn" @click="$router.push('/')">
         <el-icon><ArrowLeft /></el-icon>
-      </el-button>
-      <h1 class="room-id">房间号：{{ roomId }}</h1>
-      <el-button 
-        type="text" 
-        class="history-button" 
-        @click="$router.push('/history')"
-      >
+      </button>
+      <div class="room-info">
+        <h1 class="room-title">推理房间</h1>
+        <span class="room-id">ID: {{ roomId }}</span>
+      </div>
+      <button class="header-btn history-btn" @click="$router.push('/history')">
         <el-icon><Document /></el-icon>
-      </el-button>
-    </div>
+      </button>
+    </header>
 
     <!-- 消息主体区域 -->
-    <div class="chat-main" ref="chatMain">
-      <div class="message-scroll-container" ref="messageContainer">
-        <div class="message-container">
-          <template v-if="messages.length === 0">
-            <div class="empty-chat">
-              <div class="empty-illustration">
-                <el-icon class="empty-icon"><ChatLineSquare /></el-icon>
-              </div>
-              <h3 class="empty-title">准备探索未知谜题</h3>
-              <p class="empty-hint">点击下方"开始游戏"按钮，开启推理之旅</p>
+    <main class="chat-main" ref="messageContainer">
+      <div class="message-list">
+        <template v-if="messages.length === 0 && !isGameStarted">
+          <div class="empty-chat-state">
+            <div class="empty-icon-wrapper">
+              <el-icon><ChatLineSquare /></el-icon>
             </div>
-          </template>
-          <div 
-            v-for="(message, index) in messages" 
-            :key="index" 
-            class="message"
-            :class="[message.sender, {'message-in': true}]"
-          >
-            <el-avatar 
-              :src="message.avatar" 
-              :size="42" 
-              class="message-avatar"
-            />
+            <h2 class="empty-title">谜题尚未展开</h2>
+            <p class="empty-subtitle">点击下方的"开始游戏"，启动思维的引擎</p>
+          </div>
+        </template>
+        
+        <div 
+          v-for="(message, index) in messages" 
+          :key="index" 
+          class="message-item"
+          :class="[message.sender, {'is-typing-placeholder': message.isTyping}]"
+        >
+          <div class="message-avatar">
+             <img :src="message.avatar" alt="avatar" />
+          </div>
+          <div class="message-content-wrapper">
             <div class="message-content">
-              <div class="message-text">{{ message.content }}</div>
-              <div class="message-time">{{ message.time }}</div>
+              <p class="message-text">{{ message.content }}</p>
             </div>
+            <span class="message-time">{{ message.time }}</span>
           </div>
         </div>
+        
+        <div class="message-item ai" v-if="isTyping">
+           <div class="message-avatar">
+             <img :src="AI_AVATAR" alt="avatar" />
+          </div>
+           <div class="message-content-wrapper">
+             <div class="message-content typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+             </div>
+           </div>
+        </div>
       </div>
-    </div>
+    </main>
 
     <!-- 底部控制区域 -->
-    <div class="chat-footer">
-      <div class="controls">
-        <el-button 
-          type="success" 
-          :disabled="isGameStarted"
-          @click="handleGameStart"
-          class="control-button start-button"
-          :icon="CaretRight"
-          size="large"
-          round
-        >
-          开始游戏
-        </el-button>
-        <el-button 
-          type="danger" 
-          :disabled="gameEnded"
-          @click="handleGameEnd"
-          class="control-button end-button"
-          :icon="Close"
-          size="large"
-          round
-        >
-          结束游戏
-        </el-button>
+    <footer class="chat-footer">
+      <div class="action-buttons" v-if="!isGameStarted || gameEnded">
+         <button class="action-btn start-btn" @click="handleGameStart" :disabled="isGameStarted">
+          <el-icon><CaretRight /></el-icon>
+          开始新游戏
+        </button>
+        <button v-if="gameEnded" class="action-btn end-btn-disabled" disabled>
+          <el-icon><CircleClose /></el-icon>
+          本轮已结束
+        </button>
       </div>
 
-      <div class="input-container">
-        <div class="input-wrapper">
-          <el-input
-            v-model="inputMessage"
-            type="textarea"
-            placeholder="输入你的猜测..."
-            :autosize="{ minRows: 1, maxRows: 4 }"
-            class="message-input"
-            @keypress.enter.prevent="sendMessage"
-            :disabled="!isGameStarted || gameEnded"
-            clearable
-          />
-          <div class="send-button-wrapper">
-            <el-button 
-              type="primary" 
-              @click="sendMessage" 
-              class="send-button"
-              :disabled="!isGameStarted || gameEnded || !inputMessage.trim()"
-              circle
-            >
-              <i class="custom-send-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                  <path d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"></path>
-                </svg>
-              </i>
-            </el-button>
-          </div>
-        </div>
-        <div class="input-hint" v-if="isGameStarted && !gameEnded">
-          <el-icon><Light /></el-icon>
-          <span>提示：尝试寻找线索，提出精确问题</span>
-        </div>
+      <div class="input-area" v-else>
+        <textarea
+          ref="inputRef"
+          v-model="inputMessage"
+          placeholder="提出你的问题..."
+          class="message-input"
+          @keypress.enter.prevent="sendMessage"
+          @input="adjustTextareaHeight"
+        ></textarea>
+        <button 
+          class="send-btn" 
+          @click="sendMessage" 
+          :disabled="!inputMessage.trim() || isTyping"
+        >
+          <el-icon><Promotion /></el-icon>
+        </button>
+        <button class="end-game-btn" @click="handleGameEnd">
+          结束
+        </button>
       </div>
-    </div>
-
-    <!-- 打字动画效果 -->
-    <div class="typing-indicator" v-if="isTyping">
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-      <div class="typing-dot"></div>
-    </div>
-
-    <!-- 全局消息通知 -->
-    <el-backtop :right="20" :bottom="20" />
+    </footer>
   </div>
 </template>
 
@@ -131,11 +101,12 @@
   import { ref, reactive, onMounted, nextTick, watch } from 'vue'
   import { useRoute } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { ArrowLeft, Document, CaretRight, Close, Light, ChatLineSquare } from '@element-plus/icons-vue'
+  import { ArrowLeft, Document, CaretRight, ChatLineSquare, CircleClose, Promotion } from '@element-plus/icons-vue'
   import axios from 'axios'
 
-  const API_BASE = 'http://localhost:3000/api/chat'
   const route = useRoute()
+  
+  const API_BASE = '/api/chat'
   
   // 强制转换roomId为数值类型
   const roomId = Number(route.params.roomId)
@@ -144,7 +115,6 @@
   const isGameStarted = ref(false)
   const gameEnded = ref(false)
   const messageContainer = ref(null)
-  const chatMain = ref(null)
   const isTyping = ref(false)
 
   const messages = reactive([])
@@ -173,7 +143,7 @@
       isTyping.value = true
       await scrollToBottom()
       
-      const response = await axios.post(`${API_BASE}/${roomId}/send?message=开始游戏`)
+      const { data } = await axios.post(`${API_BASE}/rooms/${roomId}/messages`, { content: '开始游戏' })
       
       // 延迟一点以增强真实感
       setTimeout(() => {
@@ -184,7 +154,7 @@
           message: '游戏开始!'
         })
 
-        addMessage('ai', response.data)
+        addMessage('ai', data.content)
         isGameStarted.value = true
         
         // 滚动到底部显示新消息
@@ -192,8 +162,7 @@
       }, 1000)
     } catch (error) {
       isTyping.value = false
-      ElMessage.error('游戏开始失败')
-      handleApiError(error)
+      ElMessage.error('游戏开始失败: ' + (error.message || '请检查网络'))
     }
   }
 
@@ -213,14 +182,14 @@
         isTyping.value = true
         await scrollToBottom()
         
-        const response = await axios.post(`${API_BASE}/${roomId}/send?message=结束游戏`)
+        const { data } = await axios.post(`${API_BASE}/rooms/${roomId}/messages`, { content: '结束游戏' })
         
         // 延迟一点以增强真实感
         setTimeout(() => {
           isTyping.value = false
           
-          addMessage('ai', response.data)
-          checkGameEnd(response.data)
+          addMessage('ai', data.content)
+          checkGameEnd(data.content)
           
           scrollToBottom()
           ElMessage({
@@ -250,7 +219,7 @@
 
   // 检查游戏是否结束
   const checkGameEnd = (content) => {
-    if (content.includes('游戏已结束')) {
+    if (content.includes('【汤底揭晓】')) {
       gameEnded.value = true
     }
   }
@@ -272,20 +241,8 @@
       isTyping.value = true
       await scrollToBottom()
       
-      // 使用URL参数确保消息正确编码
-      const params = new URLSearchParams()
-      params.append('message', messageText)
-  
       // 发送请求
-      const response = await axios.post(
-        `${API_BASE}/${roomId}/send?${params.toString()}`,
-        null,
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }
-      )
+      const { data } = await axios.post(`${API_BASE}/rooms/${roomId}/messages`, { content: messageText })
       
       // 延迟一点以增强真实感
       setTimeout(() => {
@@ -293,10 +250,10 @@
         isTyping.value = false
         
         // 添加AI回复
-        addMessage('ai', response.data)
+        addMessage('ai', data.content)
         
         // 检查游戏是否结束
-        checkGameEnd(response.data)
+        checkGameEnd(data.content)
         
         // 滚动到底部
         scrollToBottom()
@@ -328,9 +285,7 @@
   onMounted(async () => {
     try {
       // 尝试获取该房间的历史对话
-      const { data } = await axios.get(`${API_BASE}/history`, {
-        params: { roomId }
-      })
+      const { data } = await axios.get(`${API_BASE}/rooms/${roomId}`)
       
       // 如果存在历史记录
       if (data && data.chatMessageList && data.chatMessageList.length > 0) {
@@ -341,8 +296,7 @@
         
         // 检查游戏状态
         isGameStarted.value = true
-        const lastMessage = data.chatMessageList[data.chatMessageList.length - 1]
-        if (lastMessage && lastMessage.content.includes('游戏已结束')) {
+        if (data.status === 'FINISHED') {
           gameEnded.value = true
         }
       }
@@ -352,447 +306,371 @@
     } catch (error) {
       // 如果没有历史记录或发生错误，不做特殊处理
       console.log('No history found or error occurred:', error)
+      handleApiError(error)
     }
   })
 </script>
 
 <style scoped>
-  /* 基础样式 */
-  .chat-container {
-    height: 100vh;
+/* Base Structure */
+.chat-view {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: #000000;
+  color: #EAEAEA;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* Header */
+.chat-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  z-index: 100;
+  height: 65px;
+  background-color: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.header-btn {
+  background: transparent;
+  border: none;
+  color: #AAAAAA;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.header-btn:hover {
+  color: #FFFFFF;
+}
+
+.room-info {
+  text-align: center;
+}
+
+.room-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #FFFFFF;
+}
+
+.room-id {
+  font-size: 0.8rem;
+  color: #888888;
+  font-family: monospace;
+}
+
+/* Main Chat Area */
+.chat-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 85px 1.5rem 20px 1.5rem; /* top padding for header */
+  scrollbar-width: thin;
+  scrollbar-color: #444 #111;
+}
+
+.chat-main::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-main::-webkit-scrollbar-track {
+  background: #111;
+}
+
+.chat-main::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 6px;
+}
+
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+/* Empty State */
+.empty-chat-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 200px);
+  color: #777;
+  text-align: center;
+  animation: fade-in 1s ease;
+}
+
+.empty-icon-wrapper {
+  font-size: 3rem;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 1.5rem;
+  color: #888;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #ddd;
+}
+
+.empty-subtitle {
+  font-size: 1rem;
+  color: #888;
+  max-width: 300px;
+}
+
+/* Message Items */
+.message-item {
+  display: flex;
+  gap: 0.8rem;
+  max-width: 75%;
+  align-items: flex-start;
+  animation: slide-up 0.4s ease-out;
+}
+
+.message-item.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.message-item.ai {
+  align-self: flex-start;
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+}
+
+.message-content-wrapper {
     display: flex;
     flex-direction: column;
-    background: linear-gradient(to bottom, #f6f9fe, #eef2f9);
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    position: relative;
-  }
-  
-  /* 顶部导航栏 */
-  .chat-header {
-    background: linear-gradient(135deg, #409eff, #337ecc);
-    color: white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    padding: 1rem 1.5rem;
-    position: relative;
-    z-index: 10;
-  }
-  
-  .back-button, .history-button {
-    color: white;
-    font-size: 1.2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px;
-    width: 40px;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-  }
-  
-  .back-button:hover, .history-button:hover {
-    background: rgba(255,255,255,0.2);
-    transform: scale(1.1);
-  }
-  
-  .room-id {
-    flex: 1;
-    font-size: 1.3rem;
-    font-weight: 600;
-    text-align: center;
-    margin: 0;
-    color: white;
-    letter-spacing: 1px;
-  }
-  
-  /* 消息主体区域 */
-  .chat-main {
-    flex: 1;
-    overflow: hidden;
-    position: relative;
-    padding: 0.5rem 0;
-  }
-  
-  .message-scroll-container {
-    height: 100%;
-    overflow-y: auto;
-    padding: 1.5rem 1rem;
-    scroll-behavior: smooth;
-    scrollbar-width: thin;
-    scrollbar-color: #c0c4cc #f4f4f5;
-  }
-  
-  .message-scroll-container::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .message-scroll-container::-webkit-scrollbar-track {
-    background: #f4f4f5;
-    border-radius: 10px;
-  }
-  
-  .message-scroll-container::-webkit-scrollbar-thumb {
-    background-color: #c0c4cc;
-    border-radius: 10px;
-  }
-  
-  .message-container {
-    max-width: 90%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  /* 空聊天室提示 */
-  .empty-chat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: #777;
-    padding: 3rem;
-    text-align: center;
-    animation: fadeIn 0.8s ease-out;
-  }
-  
-  .empty-illustration {
-    background: rgba(64, 158, 255, 0.1);
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 2rem;
-  }
-  
-  .empty-icon {
-    font-size: 3rem;
-    color: #409eff;
-  }
-  
-  .empty-title {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: #333;
-    margin: 0 0 1rem;
-  }
-  
-  .empty-hint {
-    font-size: 1rem;
-    color: #888;
-    max-width: 280px;
-    line-height: 1.5;
-  }
-  
-  /* 消息气泡 */
-  .message {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    max-width: 80%;
-    transition: all 0.3s ease;
-  }
-  
-  .message-in {
-    animation: fadeInMessage 0.5s forwards;
-  }
-  
-  .message.ai {
-    align-self: flex-start;
-    margin-right: auto;
-  }
-  
-  .message.user {
-    align-self: flex-end;
-    margin-left: auto;
-    flex-direction: row-reverse;
-  }
-  
-  .message-avatar {
-    flex-shrink: 0;
-    border: 2px solid white;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-  }
-  
-  .message-content {
-    position: relative;
-    padding: 1rem 1.4rem;
-    border-radius: 18px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-    word-break: break-word;
-    transition: all 0.2s ease;
-  }
-  
-  .message.ai .message-content {
-    background-color: #F4F7F9;
-    color: #333;
-    border-bottom-left-radius: 4px;
-  }
-  
-  .message.user .message-content {
-    background: linear-gradient(135deg, #409eff, #337ecc);
-    color: white;
-    border-bottom-right-radius: 4px;
-  }
-  
-  .message.ai .message-content::before {
-    content: "";
-    position: absolute;
-    left: -10px;
-    top: 15px;
-    border-top: 10px solid transparent;
-    border-right: 12px solid #F4F7F9;
-    border-bottom: 10px solid transparent;
-  }
-  
-  .message.user .message-content::before {
-    content: "";
-    position: absolute;
-    right: -10px;
-    top: 15px;
-    border-top: 10px solid transparent;
-    border-left: 12px solid #337ecc;
-    border-bottom: 10px solid transparent;
-  }
-  
-  .message-text {
-    font-size: 1rem;
-    line-height: 1.6;
-    white-space: pre-wrap;
-  }
-  
-  .message-time {
-    font-size: 0.75rem;
-    opacity: 0.8;
-    text-align: right;
-    margin-top: 0.5rem;
-  }
-  
-  /* 底部输入区域 */
-  .chat-footer {
-    padding: 1.2rem;
-    background: white;
-    border-top: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 -2px 15px rgba(0,0,0,0.05);
-    position: relative;
-    z-index: 5;
-  }
-  
-  .controls {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.2rem;
-  }
-  
-  .control-button {
-    height: auto;
-    padding: 0.7rem 1.3rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .control-button:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-  }
-  
-  .input-container {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .input-wrapper {
-    display: flex;
+}
+
+.message-item.user .message-content-wrapper {
     align-items: flex-end;
-    gap: 12px;
-    background: white;
-    border-radius: 20px;
-    padding: 12px 16px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    border: 1px solid rgba(0,0,0,0.08);
-    transition: all 0.3s ease;
-  }
-  
-  .input-wrapper:focus-within {
-    box-shadow: 0 5px 15px rgba(64, 158, 255, 0.15);
-    border-color: rgba(64, 158, 255, 0.3);
-  }
-  
-  .message-input {
-    flex: 1;
-  }
-  
-  .message-input :deep(.el-textarea__inner) {
-    border: none;
-    box-shadow: none;
-    padding: 0;
-    resize: none;
-    background: transparent;
-    font-size: 15px;
-    min-height: 24px;
-    line-height: 24px;
-  }
-  
-  .message-input :deep(.el-textarea__inner:focus) {
-    box-shadow: none;
-  }
-  
-  .send-button-wrapper {
-    display: flex;
-    flex-shrink: 0;
-  }
-  
-  .send-button {
-    width: 44px;
-    height: 44px;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
-    padding: 0;
-    margin: 0;
-  }
-  
-  .custom-send-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    transform: rotate(45deg) translateX(-1px);
-  }
-  
-  .send-button:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(64, 158, 255, 0.4);
-  }
-  
-  .input-hint {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #888;
-    font-size: 0.85rem;
-    margin-top: 0.8rem;
-    padding-left: 1rem;
-  }
-  
-  /* 打字动画指示器 */
-  .typing-indicator {
-    display: flex;
-    align-items: center;
-    padding: 0.8rem 1.2rem;
-    background: #F4F7F9;
-    border-radius: 18px;
-    width: fit-content;
-    margin: 0.5rem 0 0 4.5rem;
-    position: absolute;
-    bottom: 7rem;
-    left: 1rem;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-    z-index: 2;
-    animation: fadeIn 0.3s forwards;
-  }
-  
-  .typing-dot {
-    background-color: #999;
-    border-radius: 50%;
-    width: 8px;
-    height: 8px;
-    margin: 0 3px;
-    animation: typingAnimation 1.2s infinite ease-in-out;
-  }
-  
-  .typing-dot:nth-child(1) {
-    animation-delay: 0s;
-  }
-  
-  .typing-dot:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  
-  .typing-dot:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-  
-  /* 动画 */
-  @keyframes fadeInMessage {
-    0% { opacity: 0; transform: translateY(15px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-  
-  @keyframes typingAnimation {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-5px); }
-  }
-  
-  /* 响应式设计 */
-  @media (max-width: 768px) {
-    .chat-header {
-      padding: 0.8rem 1rem;
-    }
-    
-    .room-id {
-      font-size: 1.1rem;
-    }
-    
-    .message {
-      max-width: 85%;
-    }
-    
-    .message-content {
-      padding: 0.8rem 1.1rem;
-    }
-    
-    .message-text {
-      font-size: 0.95rem;
-    }
-    
-    .controls {
-      flex-wrap: wrap;
-    }
-    
-    .control-button {
-      flex: 1;
-      min-width: 120px;
-      justify-content: center;
-      padding: 0.6rem 1rem;
-    }
-    
-    .empty-illustration {
-      width: 80px;
-      height: 80px;
-      margin-bottom: 1.5rem;
-    }
-    
-    .empty-icon {
-      font-size: 2.5rem;
-    }
-    
-    .empty-title {
-      font-size: 1.4rem;
-    }
-    
-    .empty-hint {
-      font-size: 0.9rem;
-    }
-    
-    .typing-indicator {
-      bottom: 6.5rem;
-    }
-  }
+}
+
+.message-item.ai .message-content-wrapper {
+    align-items: flex-start;
+}
+
+.message-content {
+  background: #1C1C1E;
+  padding: 0.8rem 1.2rem;
+  border-radius: 18px;
+}
+
+.message-item.user .message-content {
+  background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC);
+  color: #FFFFFF;
+  border-top-right-radius: 4px;
+}
+
+.message-item.ai .message-content {
+  background: #2C2C2E;
+  color: #EAEAEA;
+  border-top-left-radius: 4px;
+}
+
+.message-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 15px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #888;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}
+
+
+/* Footer */
+.chat-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+  z-index: 100;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #2C2C2E;
+  color: #EAEAEA;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-btn:hover:not(:disabled) {
+  background-color: #3A3A3C;
+  border-color: #555;
+  transform: translateY(-2px);
+}
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.start-btn {
+  background: #0052D4;
+  border-color: #0052D4;
+  color: white;
+}
+.end-btn-disabled {
+  background: #444;
+  border-color: #555;
+  color: #999;
+}
+
+
+.input-area {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+  background: #1C1C1E;
+  padding: 0.6rem;
+  border-radius: 16px;
+  border: 1px solid #333;
+  transition: border-color 0.2s ease;
+}
+
+.input-area:focus-within {
+  border-color: #4364F7;
+}
+
+.message-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #EAEAEA;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: none;
+  max-height: 120px;
+  padding: 0.5rem;
+  font-family: inherit;
+}
+
+.message-input::placeholder {
+  color: #888;
+}
+
+.send-btn, .end-game-btn {
+  flex-shrink: 0;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.send-btn {
+  background-color: #0052D4;
+  color: white;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.send-btn:disabled {
+  background-color: #333;
+  color: #777;
+  cursor: not-allowed;
+}
+.send-btn:not(:disabled):hover {
+  background-color: #4364F7;
+}
+
+.end-game-btn {
+  background-color: #444;
+  color: #EAEAEA;
+  height: 48px;
+  padding: 0 1.2rem;
+  font-size: 0.9rem;
+}
+.end-game-btn:hover {
+  background-color: #D83A3A;
+  color: white;
+}
 </style>
