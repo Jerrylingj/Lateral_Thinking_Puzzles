@@ -10,10 +10,13 @@ import com.haigui.haigui.service.ChatService;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessage;
 import com.volcengine.ark.runtime.model.completion.chat.ChatMessageRole;
 import jakarta.annotation.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ChatServiceImpl implements ChatService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
 
     private static final String SYSTEM_PROMPT = "你是一个恐怖海龟汤主持人。你的任务是引导玩家通过提问来解开一个悬疑故事的真相（即“汤底”）。\n" +
             "【规则】:\n" +
@@ -31,7 +36,7 @@ public class ChatServiceImpl implements ChatService {
             "5.  如果玩家主动说“结束游戏”或“揭晓答案”，请直接揭晓汤底。\n" +
             "\n" +
             "【游戏启动模板】:\n" +
-            "\"开始游戏 ▏难度：★★★★☆ 情景：游乐园午夜12点，小丑玩偶眼眶渗出机油，过山车上发现失踪者手握断线控制器\"\n" +
+            "\"开始游戏 | 难度：★★★★☆ 情景：游乐园午夜12点，小丑玩偶眼眶渗出机油，过山车上发现失踪者手握断线控制器\"\n" +
             "\n" +
             "【汤底揭晓模板】:\n" +
             "\"【汤底揭晓】断线控制器是死者启动的紧急制动，但因年久失修的缆绳断裂，未能阻止悲剧。小丑的机油只是一个巧合的恐怖点缀。\"";
@@ -47,12 +52,13 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     @Transactional
-    public String doChat(long roomId, String message) {
+    public String doChat(long roomId, String userId, String message) {
         ChatRoom room = chatRoomMapper.selectById(roomId);
         if (room == null) {
             if ("开始游戏".equals(message)) {
                 room = new ChatRoom();
                 room.setId(roomId);
+                room.setUserId(userId);
                 room.setStatus("PLAYING");
                 chatRoomMapper.insert(room);
             } else {
@@ -70,6 +76,7 @@ public class ChatServiceImpl implements ChatService {
                 .content(message)
                 .build();
         messageMapper.insert(userMessage);
+        logger.info("[Room {}] Saved user message to DB: {}", roomId, message);
 
         List<Message> dbMessages = getMessagesByRoomId(roomId);
         List<ChatMessage> historyForAI = convertDbMessagesToSdkMessages(dbMessages);
@@ -82,6 +89,7 @@ public class ChatServiceImpl implements ChatService {
                 .content(aiResponse)
                 .build();
         messageMapper.insert(aiMessage);
+        logger.info("[Room {}] Saved AI response to DB: {}", roomId, aiResponse);
 
         if ("结束游戏".equals(message) || aiResponse.startsWith("【汤底揭晓】")) {
             room.setStatus("FINISHED");
@@ -94,18 +102,33 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public List<ChatRoom> getChatRoomList() {
         List<ChatRoom> rooms = chatRoomMapper.selectList(null);
+        if (rooms.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> roomIds = rooms.stream().map(ChatRoom::getId).collect(Collectors.toList());
+
+        QueryWrapper<Message> messagesQuery = new QueryWrapper<>();
+        messagesQuery.in("room_id", roomIds).orderByAsc("created_at");
+        List<Message> allMessages = messageMapper.selectList(messagesQuery);
+        logger.info("Fetched {} total messages from DB for {} rooms.", allMessages.size(), rooms.size());
+
+        Map<Long, List<Message>> messagesByRoomId = allMessages.stream()
+                .collect(Collectors.groupingBy(Message::getRoomId));
+
         rooms.forEach(room -> {
-            List<Message> dbMessages = getMessagesByRoomId(room.getId());
-            room.setChatMessageList(convertDbMessagesToMapList(dbMessages));
+            List<Message> roomMessages = messagesByRoomId.getOrDefault(room.getId(), Collections.emptyList());
+            room.setChatMessageList(convertDbMessagesToMapList(roomMessages));
         });
+
         return rooms;
     }
 
     @Override
     @Transactional
-    public boolean deleteChatRoom(long roomId) {
+    public boolean deleteChatRoom(long roomId, String userId) {
         ChatRoom room = chatRoomMapper.selectById(roomId);
-        if (room != null) {
+        if (room != null && userId != null && userId.equals(room.getUserId())) {
             QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
             queryWrapper.eq("room_id", roomId);
             messageMapper.delete(queryWrapper);

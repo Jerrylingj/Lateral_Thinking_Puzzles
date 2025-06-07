@@ -2,12 +2,12 @@ package com.haigui.haigui.controller;
 
 import com.haigui.haigui.model.ChatRoom;
 import com.haigui.haigui.service.ChatService;
+import lombok.Data; // Import Lombok for cleaner DTO
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.HashMap;
 
 /**
@@ -26,15 +26,15 @@ public class ChatController {
     }
 
     /**
-     * 使用 Query Parameter 传递 message
-     * 适用场景: 简短消息 + 简单调试
-     * 调用示例: POST /api/chat/123/send?message=你好AI
+     * 使用 RequestBody 传递 userId 和 message
+     * 调用示例: POST /api/chat/123/send
+     * Body: { "userId": "user_abc123", "message": "你好AI" }
      */
     @PostMapping("/{roomId}/send")
     public String doChat(
             @PathVariable long roomId,
-            @RequestParam String message) {
-        return chatService.doChat(roomId, message);
+            @RequestBody ChatRequest request) {
+        return chatService.doChat(roomId, request.getUserId(), request.getMessage());
     }
 
     /**
@@ -52,34 +52,32 @@ public class ChatController {
      */
     @GetMapping("/history")
     public ChatRoom getChatHistory(@RequestParam long roomId) {
-        ChatRoom room = chatService.getChatRoom(roomId);
-        return room != null ? room : new ChatRoom();
+        return chatService.getChatRoom(roomId);
     }
 
     /**
-     * 删除特定聊天室
-     * 调用示例: DELETE /api/chat/rooms/{roomId}
+     * 删除特定聊天室 (需要权限校验)
+     * 调用示例: DELETE /api/chat/rooms/{roomId}?userId=user_abc123
      */
     @DeleteMapping("/rooms/{roomId}")
-    public Map<String, Object> deleteChatRoom(@PathVariable long roomId) {
-        boolean success = chatService.deleteChatRoom(roomId);
+    public Map<String, Object> deleteChatRoom(
+            @PathVariable long roomId,
+            @RequestParam String userId) {
+        boolean success = chatService.deleteChatRoom(roomId, userId);
         Map<String, Object> response = new HashMap<>();
         response.put("success", success);
-        response.put("message", success ? "聊天室删除成功" : "聊天室不存在或删除失败");
+        if (success) {
+            response.put("message", "聊天室删除成功");
+        } else {
+            response.put("message", "删除失败：聊天室不存在或您没有权限");
+        }
         return response;
     }
 
     // 辅助 DTO 用于接收请求体
+    @Data // Use Lombok to generate getters/setters
     static class ChatRequest {
+        private String userId;
         private String message;
-
-        // Getter/Setter 保证 JSON 反序列化
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
     }
 }

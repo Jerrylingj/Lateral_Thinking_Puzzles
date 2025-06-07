@@ -21,6 +21,9 @@ public class ChatRoom {
     @TableId(value = "id", type = IdType.INPUT)
     private Long id;
 
+    @TableField("user_id")
+    private String userId;
+
     private String status;
 
     private LocalDateTime createdAt;

@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS `chat_room`;
 -- ----------------------------
 CREATE TABLE `chat_room` (
   `id` bigint(20) NOT NULL COMMENT '主键ID，房间号 (由前端生成)',
+  `user_id` varchar(255) DEFAULT NULL COMMENT '创建者匿名ID',
   `status` varchar(50) NOT NULL DEFAULT 'PLAYING' COMMENT '房间状态 (PLAYING, FINISHED)',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

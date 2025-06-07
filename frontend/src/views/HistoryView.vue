@@ -31,7 +31,8 @@
         <div 
           v-for="(room, index) in history" 
           :key="room.id" 
-          class="history-card" 
+          class="history-card"
+          :class="{ 'is-mine': room.userId === myUserId }"
           @click="continueChat(room.id)"
           :style="{ animationDelay: `${index * 0.05}s` }"
         >
@@ -40,6 +41,7 @@
               {{ room.status === 'FINISHED' ? '已完成' : '进行中' }}
             </span>
             <el-popconfirm
+                v-if="room.userId === myUserId"
                 title="确定要永久删除此条记录吗?"
                 confirm-button-text="确认删除"
                 cancel-button-text="取消"
@@ -74,33 +76,51 @@ import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { ArrowLeft, Delete, MessageBox, CaretRight, WarningFilled } from '@element-plus/icons-vue';
 import axios from 'axios';
+import { getUserId } from '@/utils/user';
 
 const API_BASE = '/api/chat'; 
 
 const router = useRouter();
 const loading = ref(true);
 const history = ref([]);
+const myUserId = ref('');
+
+onMounted(async () => {
+  myUserId.value = getUserId();
+  await loadHistory();
+});
 
 const loadHistory = async () => {
   try {
     loading.value = true;
     const { data } = await axios.get(`${API_BASE}/rooms`);
+    
+    // Log the raw data from the backend to the browser's console for debugging
+    console.log('Received history data from backend:', JSON.stringify(data, null, 2));
+
     if (data && Array.isArray(data)) {
       history.value = data
-        .filter(room => room.chatMessageList && room.chatMessageList.length > 0)
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    } else {
+      // Handle cases where data is not in the expected format
+      console.error('Received unexpected data format from /api/chat/rooms:', data);
+      history.value = [];
     }
   } catch (error) {
     ElMessage.error('获取历史记录失败');
-    console.error(error);
+    console.error('Error fetching history:', error); // Log the full error object
   } finally {
     loading.value = false;
   }
 };
 
 const getRoomSummary = (room) => {
+  // Defensive check to prevent rendering errors if data structure is unexpected
+  if (!room || !Array.isArray(room.chatMessageList) || room.chatMessageList.length === 0) {
+    return '暂无摘要';
+  }
   const aiMessage = room.chatMessageList.find(msg => msg.role === 'ASSISTANT');
-  if (aiMessage) {
+  if (aiMessage && aiMessage.content) {
     return aiMessage.content.length > 80 ? aiMessage.content.substring(0, 80) + '...' : aiMessage.content;
   }
   return '暂无摘要';
@@ -122,16 +142,16 @@ const continueChat = (roomId) => {
 
 const deleteHistory = async (roomId) => {
   try {
-    await axios.delete(`${API_BASE}/rooms/${roomId}`);
+    await axios.delete(`${API_BASE}/rooms/${roomId}`, {
+      params: { userId: myUserId.value }
+    });
     ElMessage.success('删除成功');
-    loadHistory();
+    await loadHistory();
   } catch (error) {
-    ElMessage.error('删除失败');
-    console.error(error);
+    const errorMsg = error.response?.data?.message || '删除失败';
+    ElMessage.error(errorMsg);
   }
 };
-
-onMounted(loadHistory);
 </script>
 
 <style scoped>
@@ -228,7 +248,7 @@ onMounted(loadHistory);
 }
 .history-card {
   background-color: #FFFFFF;
-  border: 1px solid #E5E5E5;
+  border: 1px solid #EAEAEA;
   border-radius: 16px;
   padding: 1.2rem;
   display: flex;
@@ -237,21 +257,28 @@ onMounted(loadHistory);
   height: 180px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  opacity: 0; /* For staggered animation */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
   animation: fade-in-up 0.5s ease forwards;
+  position: relative;
+  overflow: hidden;
 }
 .history-card:hover {
   transform: translateY(-5px);
-  border-color: #D1D1D1;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-}
-@keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  border-color: #DCDCDC;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
 }
 
-.card-header { display: flex; justify-content: space-between; align-items: center; }
+/* Card for "My Rooms" */
+.history-card.is-mine {
+  border-left: 4px solid #007AFF;
+  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.1);
+}
+.history-card.is-mine:hover {
+  border-color: rgba(0, 122, 255, 0.5);
+  box-shadow: 0 8px 25px rgba(0, 122, 255, 0.15);
+}
+
+.card-header { display: flex; justify-content: space-between; align-items: center; z-index: 1; }
 .card-status {
   font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem;
   border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;

@@ -31,7 +31,7 @@ import { CaretRight, Document } from '@element-plus/icons-vue'
 const router = useRouter()
 
 const startGame = () => {
-  // 使用时间戳和随机数组合，确保唯一性
+  // 使用时间戳，确保唯一性
   const roomId = Date.now()
   router.push(`/chat/${roomId}`)
 }

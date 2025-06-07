@@ -13,10 +13,11 @@ public interface ChatService {
      * 和AI对话
      * 
      * @param roomId  聊天室ID
+     * @param userId  用户匿名ID
      * @param message 用户输入
      * @return AI 返回结果
      */
-    String doChat(long roomId, String message);
+    String doChat(long roomId, String userId, String message);
 
     /**
      * 获取对话列表
@@ -29,9 +30,10 @@ public interface ChatService {
      * 删除特定聊天室
      * 
      * @param roomId 聊天室ID
+     * @param userId  用户匿名ID (用于权限校验)
      * @return 是否删除成功
      */
-    boolean deleteChatRoom(long roomId);
+    boolean deleteChatRoom(long roomId, String userId);
 
     /**
      * 获取特定聊天室

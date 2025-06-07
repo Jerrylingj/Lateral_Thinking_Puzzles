@@ -104,6 +104,7 @@
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { ArrowLeft, Document, CaretRight, ChatLineSquare, CircleClose, Promotion, SwitchButton } from '@element-plus/icons-vue'
   import axios from 'axios'
+  import { getUserId } from '@/utils/user'
 
   const route = useRoute()
   
@@ -111,6 +112,7 @@
   
   // 强制转换roomId为数值类型
   const roomId = Number(route.params.roomId)
+  const userId = getUserId()
 
   const inputMessage = ref('')
   const isGameStarted = ref(false)
@@ -140,27 +142,17 @@
   // 游戏开始
   const handleGameStart = async () => {
     try {
-      // 显示打字动画
       isTyping.value = true
       await scrollToBottom()
       
-      const params = new URLSearchParams()
-      params.append('message', '开始游戏')
-      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, null, { params })
+      const requestBody = { userId, message: '开始游戏' };
+      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, requestBody)
       
-      // 延迟一点以增强真实感
       setTimeout(() => {
         isTyping.value = false
-        
-        ElMessage({
-          type: 'success',
-          message: '游戏开始!'
-        })
-
+        ElMessage({ type: 'success', message: '游戏开始!' })
         addMessage('ai', data)
         isGameStarted.value = true
-        
-        // 滚动到底部显示新消息
         scrollToBottom()
       }, 800)
     } catch (error) {
@@ -171,45 +163,25 @@
 
   // 游戏结束
   const handleGameEnd = async () => {
-    try {
-      ElMessageBox.confirm(
-        '确定要结束当前游戏吗？',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }
-      ).then(async () => {
-        // 显示打字动画
-        isTyping.value = true
-        await scrollToBottom()
-        
-        const params = new URLSearchParams()
-        params.append('message', '结束游戏')
-        const { data } = await axios.post(`${API_BASE}/${roomId}/send`, null, { params })
-        
-        // 延迟一点以增强真实感
-        setTimeout(() => {
-          isTyping.value = false
-          
-          addMessage('ai', data)
-          checkGameEnd(data)
-          
-          scrollToBottom()
-          ElMessage({
-            type: 'success',
-            message: '游戏已结束',
-          })
-        }, 800)
-      }).catch(() => {
-        // 用户取消
-      })
-    } catch (error) {
-      isTyping.value = false
-      ElMessage.error('游戏结束失败')
-      handleApiError(error)
-    }
+    ElMessageBox.confirm('确定要结束当前游戏吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }).then(async () => {
+      isTyping.value = true
+      await scrollToBottom()
+      
+      const requestBody = { userId, message: '结束游戏' };
+      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, requestBody)
+      
+      setTimeout(() => {
+        isTyping.value = false
+        addMessage('ai', data)
+        checkGameEnd(data)
+        scrollToBottom()
+        ElMessage({ type: 'success', message: '游戏已结束' })
+      }, 800)
+    }).catch(() => { /* User cancelled */ })
   }
 
   // 添加消息
@@ -234,35 +206,21 @@
     const messageText = inputMessage.value.trim()
     if (!messageText || !isGameStarted.value || gameEnded.value) return
     
-    try {
-      // 先添加用户消息
-      addMessage('user', messageText)
-      await scrollToBottom()
-      
-      // 清空输入框
-      inputMessage.value = ''
-      
-      // 显示打字动画
-      isTyping.value = true
-      await scrollToBottom()
+    addMessage('user', messageText)
+    inputMessage.value = ''
+    await scrollToBottom()
+    
+    isTyping.value = true
+    await scrollToBottom()
 
-      // 发送请求 - 修正：使用 query parameter
-      const params = new URLSearchParams()
-      params.append('message', messageText)
-      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, null, { params })
+    try {
+      const requestBody = { userId, message: messageText };
+      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, requestBody);
       
-      // 延迟一点以增强真实感
       setTimeout(() => {
-        // 关闭打字动画
         isTyping.value = false
-        
-        // 添加AI回复
         addMessage('ai', data)
-        
-        // 检查游戏是否结束
         checkGameEnd(data)
-        
-        // 滚动到底部
         scrollToBottom()
       }, 800)
     } catch (error) {
