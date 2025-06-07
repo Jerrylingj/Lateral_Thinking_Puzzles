@@ -143,7 +143,9 @@
       isTyping.value = true
       await scrollToBottom()
       
-      const { data } = await axios.post(`${API_BASE}/rooms/${roomId}/messages`, { content: '开始游戏' })
+      const params = new URLSearchParams()
+      params.append('message', '开始游戏')
+      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, null, { params })
       
       // 延迟一点以增强真实感
       setTimeout(() => {
@@ -154,7 +156,7 @@
           message: '游戏开始!'
         })
 
-        addMessage('ai', data.content)
+        addMessage('ai', data)
         isGameStarted.value = true
         
         // 滚动到底部显示新消息
@@ -182,14 +184,16 @@
         isTyping.value = true
         await scrollToBottom()
         
-        const { data } = await axios.post(`${API_BASE}/rooms/${roomId}/messages`, { content: '结束游戏' })
+        const params = new URLSearchParams()
+        params.append('message', '结束游戏')
+        const { data } = await axios.post(`${API_BASE}/${roomId}/send`, null, { params })
         
         // 延迟一点以增强真实感
         setTimeout(() => {
           isTyping.value = false
           
-          addMessage('ai', data.content)
-          checkGameEnd(data.content)
+          addMessage('ai', data)
+          checkGameEnd(data)
           
           scrollToBottom()
           ElMessage({
@@ -240,9 +244,11 @@
       // 显示打字动画
       isTyping.value = true
       await scrollToBottom()
-      
-      // 发送请求
-      const { data } = await axios.post(`${API_BASE}/rooms/${roomId}/messages`, { content: messageText })
+
+      // 发送请求 - 修正：使用 query parameter
+      const params = new URLSearchParams()
+      params.append('message', messageText)
+      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, null, { params })
       
       // 延迟一点以增强真实感
       setTimeout(() => {
@@ -250,10 +256,10 @@
         isTyping.value = false
         
         // 添加AI回复
-        addMessage('ai', data.content)
+        addMessage('ai', data)
         
         // 检查游戏是否结束
-        checkGameEnd(data.content)
+        checkGameEnd(data)
         
         // 滚动到底部
         scrollToBottom()
@@ -284,8 +290,10 @@
   // 获取历史对话
   onMounted(async () => {
     try {
-      // 尝试获取该房间的历史对话
-      const { data } = await axios.get(`${API_BASE}/rooms/${roomId}`)
+      // 尝试获取该房间的历史对话 - 修正：使用正确的历史记录接口
+      const { data } = await axios.get(`${API_BASE}/history`, {
+        params: { roomId }
+      })
       
       // 如果存在历史记录
       if (data && data.chatMessageList && data.chatMessageList.length > 0) {
