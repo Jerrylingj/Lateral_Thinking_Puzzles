@@ -3,15 +3,8 @@ module.exports = defineConfig({
   transpileDependencies: true,
   // 开发服务器配置
   devServer: {
-    proxy: {
-      // 配置代理
-      '/api': {
-        target: 'http://localhost:8080', // 后端API地址
-        changeOrigin: true,
-        pathRewrite: {
-          '^/api': '' // 将 /api 替换为空
-        }
-      }
-    }
+    // 将端口固定为 8081，以避免与常见的 8080 端口冲突
+    port: 8081,
+    // 移除无效的代理配置，因为我们使用 CORS 进行跨域
   }
 })
