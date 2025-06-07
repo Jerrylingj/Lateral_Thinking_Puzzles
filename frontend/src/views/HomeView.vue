@@ -49,8 +49,10 @@ const goToHistory = () => {
   justify-content: center;
   height: 100vh;
   width: 100vw;
-  background-color: #0A0A0A;
-  color: #EAEAEA;
+  background-color: #FFFFFF;
+  background-image: radial-gradient(circle at top left, rgba(0, 122, 255, 0.05), transparent 30%),
+                    radial-gradient(circle at bottom right, rgba(0, 122, 255, 0.05), transparent 30%);
+  color: #1a1a1a;
   overflow: hidden;
   position: relative;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -63,16 +65,10 @@ const goToHistory = () => {
   right: 0;
   bottom: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 30px 30px;
-  animation: bg-pan 120s linear infinite;
-  z-index: 0;
-}
-
-@keyframes bg-pan {
-  from { background-position: 0 0; }
-  to { background-position: -3000px -3000px; }
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.5;
 }
 
 .content-wrapper {
@@ -83,31 +79,37 @@ const goToHistory = () => {
   align-items: center;
   text-align: center;
   padding: 2rem;
-  animation: fade-in 1.5s ease-out;
+  animation: fade-in-scale 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fade-in-scale {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.98); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
 }
 
 .title-group {
-  margin-bottom: 3rem;
+  margin-bottom: 3.5rem;
 }
 
 .main-title {
-  font-size: 4rem;
+  font-size: 4.5rem;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  background: -webkit-linear-gradient(45deg, #FFFFFF, #B8B8B8);
+  letter-spacing: -0.03em;
+  background: linear-gradient(120deg, #333, #000);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 0;
 }
 
 .subtitle {
-  font-size: 1.25rem;
-  color: #888888;
+  font-size: 1.2rem;
+  color: #666666;
   margin-top: 0.75rem;
   font-weight: 400;
 }
@@ -123,13 +125,13 @@ const goToHistory = () => {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 0.8rem 1.8rem;
+  padding: 0 1.8rem;
   font-size: 1rem;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   height: 52px;
 }
 
@@ -138,33 +140,44 @@ const goToHistory = () => {
 }
 
 .action-btn.primary {
-  background: linear-gradient(45deg, #2a75ff, #0d59e3);
+  background: #007AFF;
   color: white;
-  border-color: #2a75ff;
-  box-shadow: 0 5px 15px rgba(42, 117, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15), 0 1px 3px rgba(0, 122, 255, 0.2);
 }
 
 .action-btn.primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(42, 117, 255, 0.3);
+  background: #0070e9;
+  box-shadow: 0 7px 18px rgba(0, 122, 255, 0.2), 0 4px 5px rgba(0, 122, 255, 0.1);
+}
+
+.action-btn.primary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.2);
 }
 
 .action-btn.secondary {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #EAEAEA;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #FFFFFF;
+  color: #333;
+  border: 1px solid #E5E5E5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .action-btn.secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-3px);
+  border-color: #D1D1D1;
+  box-shadow: 0 7px 18px rgba(0, 0, 0, 0.06), 0 4px 5px rgba(0, 0, 0, 0.08);
+}
+
+.action-btn.secondary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .home-footer {
   position: absolute;
   bottom: 1.5rem;
-  color: #555555;
+  color: #AAAAAA;
   font-size: 0.8rem;
   z-index: 1;
 }

@@ -32,7 +32,7 @@
           v-for="(message, index) in messages" 
           :key="index" 
           class="message-item"
-          :class="[message.sender, {'is-typing-placeholder': message.isTyping}]"
+          :class="message.sender"
         >
           <div class="message-avatar">
              <img :src="message.avatar" alt="avatar" />
@@ -47,7 +47,7 @@
         
         <div class="message-item ai" v-if="isTyping">
            <div class="message-avatar">
-             <img :src="AI_AVATAR" alt="avatar" />
+             <img :src="AI_AVATAR_SVG" alt="avatar" />
           </div>
            <div class="message-content-wrapper">
              <div class="message-content typing-indicator">
@@ -82,15 +82,16 @@
           @keypress.enter.prevent="sendMessage"
           @input="adjustTextareaHeight"
         ></textarea>
+        <button class="end-game-btn" @click="handleGameEnd" title="结束游戏">
+          <el-icon><SwitchButton /></el-icon>
+        </button>
         <button 
           class="send-btn" 
           @click="sendMessage" 
           :disabled="!inputMessage.trim() || isTyping"
+          title="发送"
         >
           <el-icon><Promotion /></el-icon>
-        </button>
-        <button class="end-game-btn" @click="handleGameEnd">
-          结束
         </button>
       </div>
     </footer>
@@ -101,7 +102,7 @@
   import { ref, reactive, onMounted, nextTick, watch } from 'vue'
   import { useRoute } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
-  import { ArrowLeft, Document, CaretRight, ChatLineSquare, CircleClose, Promotion } from '@element-plus/icons-vue'
+  import { ArrowLeft, Document, CaretRight, ChatLineSquare, CircleClose, Promotion, SwitchButton } from '@element-plus/icons-vue'
   import axios from 'axios'
 
   const route = useRoute()
@@ -119,8 +120,8 @@
 
   const messages = reactive([])
 
-  const AI_AVATAR = '/ai-avatar.svg'
-  const USER_AVATAR = '/user-avatar.svg'
+  const AI_AVATAR_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="%23007AFF" stroke-width="5"><path d="M25,35 A25,25 0 1,1 75,35" stroke-linecap="round" /><path d="M25,35 A25,25 0 0,0 75,35" stroke-linecap="round"/><circle cx="50" cy="50" r="45" /></g></svg>`
+  const USER_AVATAR_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="none" stroke="%23333" stroke-width="5"><circle cx="50" cy="35" r="15" /><path d="M15,90 A35,35 0 0,1 85,90" stroke-linecap="round"/></g></svg>`
 
   // 格式化当前时间
   const formatTime = () => {
@@ -161,7 +162,7 @@
         
         // 滚动到底部显示新消息
         scrollToBottom()
-      }, 1000)
+      }, 800)
     } catch (error) {
       isTyping.value = false
       ElMessage.error('游戏开始失败: ' + (error.message || '请检查网络'))
@@ -200,7 +201,7 @@
             type: 'success',
             message: '游戏已结束',
           })
-        }, 1000)
+        }, 800)
       }).catch(() => {
         // 用户取消
       })
@@ -216,14 +217,14 @@
     messages.push({
       sender,
       content,
-      avatar: sender === 'ai' ? AI_AVATAR : USER_AVATAR,
+      avatar: sender === 'ai' ? AI_AVATAR_SVG : USER_AVATAR_SVG,
       time: formatTime()
     })
   }
 
   // 检查游戏是否结束
   const checkGameEnd = (content) => {
-    if (content.includes('【汤底揭晓】')) {
+    if (typeof content === 'string' && content.includes('【汤底揭晓】')) {
       gameEnded.value = true
     }
   }
@@ -263,7 +264,7 @@
         
         // 滚动到底部
         scrollToBottom()
-      }, 1000)
+      }, 800)
     } catch (error) {
       isTyping.value = false
       handleApiError(error)
@@ -272,14 +273,8 @@
   
   // 错误处理
   const handleApiError = (error) => {
-    if (error.response) {
-      const { status, data } = error.response
-      ElMessage.error(`请求错误 (${status}): ${typeof data === 'string' ? data : JSON.stringify(data)}`)
-    } else if (error.request) {
-      ElMessage.error('网络连接异常，请检查服务器是否正常运行')
-    } else {
-      ElMessage.error(`发生错误: ${error.message}`)
-    }
+    const message = error.response?.data?.message || error.message || '未知错误'
+    ElMessage.error(`请求错误: ${message}`)
   }
   
   // 监听消息变化，自动滚动
@@ -326,8 +321,8 @@
   width: 100vw;
   display: flex;
   flex-direction: column;
-  background-color: #000000;
-  color: #EAEAEA;
+  background-color: #FFFFFF;
+  color: #1a1a1a;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   overflow: hidden;
 }
@@ -341,32 +336,31 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem 1.5rem;
+  padding: 0 1rem;
   z-index: 100;
   height: 65px;
-  background-color: rgba(10, 10, 10, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid #E5E5E5;
+  transition: box-shadow 0.2s ease;
 }
 
 .header-btn {
   background: transparent;
   border: none;
-  color: #AAAAAA;
+  color: #666666;
   font-size: 1.5rem;
   cursor: pointer;
   transition: color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
 }
 
-.header-btn:hover {
-  color: #FFFFFF;
-}
+.header-btn:hover { color: #000000; }
 
 .room-info {
   text-align: center;
@@ -376,7 +370,6 @@
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0;
-  color: #FFFFFF;
 }
 
 .room-id {
@@ -389,9 +382,7 @@
 .chat-main {
   flex: 1;
   overflow-y: auto;
-  padding: 85px 1.5rem 20px 1.5rem; /* top padding for header */
-  scrollbar-width: thin;
-  scrollbar-color: #444 #111;
+  padding: 85px 1.5rem 120px 1.5rem; /* top & bottom padding */
 }
 
 .chat-main::-webkit-scrollbar {
@@ -419,35 +410,35 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 200px);
-  color: #777;
+  padding-top: 10vh;
+  color: #999;
   text-align: center;
   animation: fade-in 1s ease;
 }
 
 .empty-icon-wrapper {
-  font-size: 3rem;
-  width: 90px;
-  height: 90px;
+  font-size: 2.5rem;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: #F0F0F0;
   margin-bottom: 1.5rem;
-  color: #888;
+  color: #BDBDBD;
 }
 
 .empty-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #ddd;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #555;
 }
 
 .empty-subtitle {
-  font-size: 1rem;
-  color: #888;
-  max-width: 300px;
+  font-size: 0.9rem;
+  color: #999;
+  max-width: 280px;
 }
 
 /* Message Items */
@@ -456,7 +447,7 @@
   gap: 0.8rem;
   max-width: 75%;
   align-items: flex-start;
-  animation: slide-up 0.4s ease-out;
+  animation: slide-up-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .message-item.user {
@@ -468,18 +459,19 @@
   align-self: flex-start;
 }
 
-@keyframes slide-up {
-  from { opacity: 0; transform: translateY(15px); }
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .message-avatar {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  background-color: #F0F0F0;
+  padding: 5px;
 }
 
 .message-avatar img {
@@ -501,21 +493,20 @@
 }
 
 .message-content {
-  background: #1C1C1E;
   padding: 0.8rem 1.2rem;
-  border-radius: 18px;
+  border-radius: 20px;
 }
 
 .message-item.user .message-content {
-  background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC);
+  background: #007AFF;
   color: #FFFFFF;
-  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
 }
 
 .message-item.ai .message-content {
-  background: #2C2C2E;
-  color: #EAEAEA;
-  border-top-left-radius: 4px;
+  background: #EFEFEF;
+  color: #1a1a1a;
+  border-bottom-left-radius: 4px;
 }
 
 .message-text {
@@ -527,10 +518,12 @@
 
 .message-time {
   font-size: 0.75rem;
-  color: #888;
+  color: #AAAAAA;
   margin-top: 0.5rem;
   padding: 0 0.5rem;
 }
+
+.message-item.user .message-time { color: rgba(255, 255, 255, 0.7); }
 
 /* Typing Indicator */
 .typing-indicator {
@@ -544,7 +537,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: #888;
+  background-color: #BDBDBD;
   animation: typing-bounce 1.4s infinite ease-in-out both;
 }
 .typing-dot:nth-child(1) { animation-delay: -0.32s; }
@@ -562,8 +555,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+  padding: 1rem 1.5rem 1.5rem;
+  background: linear-gradient(to top, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
   z-index: 100;
 }
 
@@ -577,34 +570,37 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #2C2C2E;
-  color: #EAEAEA;
-  border: 1px solid #444;
+  background-color: #FFFFFF;
+  color: #333;
+  border: 1px solid #E5E5E5;
   border-radius: 12px;
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .action-btn:hover:not(:disabled) {
-  background-color: #3A3A3C;
-  border-color: #555;
+  background-color: #F9F9F9;
+  border-color: #DCDCDC;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 .action-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 .start-btn {
-  background: #0052D4;
-  border-color: #0052D4;
+  background: #007AFF;
+  border-color: #007AFF;
   color: white;
 }
+.start-btn:hover { background: #0070e9 !important; border-color: #0070e9 !important; }
 .end-btn-disabled {
-  background: #444;
-  border-color: #555;
+  background: #E5E5E5;
+  border-color: #E5E5E5;
   color: #999;
 }
 
@@ -612,16 +608,18 @@
 .input-area {
   display: flex;
   align-items: flex-end;
-  gap: 0.8rem;
-  background: #1C1C1E;
-  padding: 0.6rem;
-  border-radius: 16px;
-  border: 1px solid #333;
-  transition: border-color 0.2s ease;
+  gap: 0.5rem;
+  background: #FFFFFF;
+  padding: 0.5rem;
+  border-radius: 24px;
+  border: 1px solid #E5E5E5;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .input-area:focus-within {
-  border-color: #4364F7;
+  border-color: #007AFF;
+  box-shadow: 0 4px 20px rgba(0, 122, 255, 0.15);
 }
 
 .message-input {
@@ -629,56 +627,52 @@
   border: none;
   outline: none;
   background: transparent;
-  color: #EAEAEA;
+  color: #1a1a1a;
   font-size: 1rem;
   line-height: 1.5;
   resize: none;
   max-height: 120px;
-  padding: 0.5rem;
+  padding: 0.6rem 1rem;
   font-family: inherit;
 }
 
 .message-input::placeholder {
-  color: #888;
+  color: #AAAAAA;
 }
 
 .send-btn, .end-game-btn {
   flex-shrink: 0;
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-weight: 500;
-}
-
-.send-btn {
-  background-color: #0052D4;
-  color: white;
   width: 48px;
   height: 48px;
-  font-size: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.3rem;
+}
+
+.send-btn {
+  background-color: #007AFF;
+  color: white;
 }
 .send-btn:disabled {
-  background-color: #333;
-  color: #777;
+  background-color: #E5E5E5;
+  color: #BDBDBD;
   cursor: not-allowed;
 }
 .send-btn:not(:disabled):hover {
-  background-color: #4364F7;
+  background-color: #0070e9;
+  transform: scale(1.05);
 }
 
 .end-game-btn {
-  background-color: #444;
-  color: #EAEAEA;
-  height: 48px;
-  padding: 0 1.2rem;
-  font-size: 0.9rem;
+  background-color: #F0F0F0;
+  color: #555;
 }
 .end-game-btn:hover {
-  background-color: #D83A3A;
-  color: white;
+  background-color: #E5E5E5;
 }
 </style>

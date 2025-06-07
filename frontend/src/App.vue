@@ -29,8 +29,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #000000;
-  color: #EAEAEA;
+  background: #F7F7F7; /* Use a slightly off-white for a softer feel */
+  color: #1a1a1a; /* Dark gray for text, not pure black */
 }
 
 #app, .app-container {
@@ -38,33 +38,34 @@ body {
   width: 100%;
 }
 
-/* Dark-themed scrollbar */
+/* Light-themed scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: #EFEFEF;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #444;
-  border-radius: 6px;
+  background: #D1D1D1;
+  border-radius: 8px;
+  border: 2px solid #EFEFEF; /* Add padding around thumb */
   transition: background 0.2s ease-in-out;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: #B1B1B1;
 }
 
-/* Global input focus outline */
-input:focus, textarea:focus, button:focus {
+/* Subtle focus ring for accessibility */
+input:focus-visible, textarea:focus-visible, button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(67, 100, 247, 0.4); /* Subtle focus ring matching the theme */
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
 }
-button:focus {
-  box-shadow: none; /* Buttons have their own focus styles */
+button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
 }
 
 
