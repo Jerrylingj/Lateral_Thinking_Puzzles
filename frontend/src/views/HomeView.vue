@@ -28,6 +28,7 @@
     </section>
 
     <section class="info-screen fullscreen-section" ref="infoScreen" :class="{ 'is-visible': isInfoVisible }">
+      <!-- <div class="background-image"></div> -->
       <div class="section-content">
         <h2 class="section-title">一个故事，多种可能</h2>
         <p class="section-description">
@@ -204,6 +205,14 @@ onUnmounted(() => {
   margin-bottom: 3.5rem;
 }
 
+.logo-container {
+  display: none;
+}
+
+.main-logo {
+  display: none;
+}
+
 .main-title {
   font-size: 4.5rem;
   font-weight: 700;
@@ -312,6 +321,24 @@ onUnmounted(() => {
   position: relative;
 }
 
+/* .info-screen .background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('@/assets/background.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.4;
+  z-index: 0;
+  transition: opacity 1s ease;
+}
+
+.info-screen.is-visible .background-image {
+  opacity: 0.6;
+} */
+
 .info-screen::before {
   content: '';
   position: absolute;
@@ -323,7 +350,7 @@ onUnmounted(() => {
     linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 60px 60px;
   opacity: 0.3;
-  z-index: 0;
+  z-index: 1;
 }
 
 .section-content {
@@ -334,7 +361,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .section-title {
@@ -563,6 +590,10 @@ onUnmounted(() => {
 
   .home-container::before {
     animation-duration: 40s;
+  }
+
+  .main-logo {
+    display: none;
   }
 }
 </style>
