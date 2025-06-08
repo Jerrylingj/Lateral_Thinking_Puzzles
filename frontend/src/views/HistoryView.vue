@@ -161,7 +161,7 @@ const deleteHistory = async (roomId) => {
   width: 100vw;
   display: flex;
   flex-direction: column;
-  background-color: #F7F7F7;
+  background-color: #F9F9FB;
   color: #1a1a1a;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -178,138 +178,153 @@ const deleteHistory = async (roomId) => {
   padding: 0 1rem;
   z-index: 100;
   height: 65px;
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: saturate(180%) blur(10px);
-  -webkit-backdrop-filter: saturate(180%) blur(10px);
-  border-bottom: 1px solid #E5E5E5;
+  background-color: rgba(255, 255, 255, 0.6);
+  backdrop-filter: saturate(180%) blur(15px);
+  -webkit-backdrop-filter: saturate(180%) blur(15px);
+  border-bottom: 1px solid #EAEAEA;
 }
 .header-btn {
-  background: transparent; border: none; color: #666; font-size: 1.5rem;
+  background: transparent; border: none; color: #555; font-size: 1.5rem;
   cursor: pointer; transition: color 0.2s ease; display: flex;
-  align-items: center; justify-content: center; width: 44px; height: 44px;
+  align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%;
 }
-.header-btn:hover { color: #000; }
+.header-btn:hover { color: #000; background-color: rgba(0,0,0,0.05); }
 .header-placeholder { width: 44px; }
-.page-title { font-size: 1.2rem; font-weight: 600; }
+.page-title { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.5px; }
 
 /* Main Content */
 .history-main {
   flex: 1;
   overflow-y: auto;
-  padding: 85px 1.5rem 2rem;
+  padding: 85px 2rem 2rem;
 }
 
 /* Loading State */
 .loading-state {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.8rem;
 }
 .skeleton-card {
-  height: 180px;
-  background-color: #FFFFFF;
-  border-radius: 16px;
-  border: 1px solid #E5E5E5;
-  opacity: 0;
-  animation: skeleton-pulse 1.5s infinite ease-in-out, fade-in 0.5s ease forwards;
+  height: 190px;
+  background: linear-gradient(110deg, #f9f9f9 8%, #f0f0f0 18%, #f9f9f9 33%);
+  background-size: 200% 100%;
+  border-radius: 20px;
+  animation: 1.5s skeleton-shine infinite linear;
 }
-@keyframes skeleton-pulse {
-  0% { background-color: #FFFFFF; }
-  50% { background-color: #F0F0F0; }
-  100% { background-color: #FFFFFF; }
+@keyframes skeleton-shine {
+  to {
+    background-position-x: -200%;
+  }
 }
 
 /* Empty State */
 .empty-state {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: calc(100vh - 150px); color: #999; text-align: center;
+  height: calc(100vh - 150px); color: #A0A0A0; text-align: center;
   animation: fade-in 1s ease;
 }
 .empty-icon-wrapper {
-  font-size: 2.5rem; width: 80px; height: 80px; border-radius: 50%;
+  font-size: 3rem; width: 90px; height: 90px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: #F0F0F0; margin-bottom: 1.5rem; color: #BDBDBD;
+  background: linear-gradient(135deg, #F0F2F5, #E8EAEF);
+  margin-bottom: 2rem; color: #B0B0B0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
-.empty-title { font-size: 1.4rem; font-weight: 500; color: #555; }
-.empty-subtitle { font-size: 0.9rem; color: #999; margin: 0.5rem 0 2rem; }
+.empty-title { font-size: 1.5rem; font-weight: 600; color: #333; }
+.empty-subtitle { font-size: 1rem; color: #888; margin: 0.5rem 0 2.5rem; }
 .empty-action-btn {
-  display: inline-flex; align-items: center; gap: 0.5rem;
-  background: #007AFF; color: white; border: none; border-radius: 12px;
-  padding: 0.8rem 1.5rem; font-size: 1rem; font-weight: 500; cursor: pointer;
-  transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15);
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: linear-gradient(135deg, #007BFF, #0056B3);
+  color: white; border: none; border-radius: 14px;
+  padding: 0.9rem 1.8rem; font-size: 1rem; font-weight: 500; cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 122, 255, 0.2);
 }
-.empty-action-btn:hover { background: #0070e9; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 122, 255, 0.2); }
+.empty-action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(0, 122, 255, 0.3);
+}
 
 /* History Grid */
 .history-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.8rem;
 }
 .history-card {
   background-color: #FFFFFF;
-  border: 1px solid #EAEAEA;
-  border-radius: 16px;
-  padding: 1.2rem;
+  border: 1px solid #EBEBEB;
+  border-radius: 20px;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 180px;
+  height: 190px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-  animation: fade-in-up 0.5s ease forwards;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
 }
 .history-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-6px);
   border-color: #DCDCDC;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 /* Card for "My Rooms" */
-.history-card.is-mine {
-  border-left: 4px solid #007AFF;
-  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.1);
+.history-card.is-mine::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(0, 122, 255, 0.1) 0%, rgba(0, 122, 255, 0) 60%);
+  transition: transform 0.4s ease;
+  transform: scale(0);
 }
-.history-card.is-mine:hover {
-  border-color: rgba(0, 122, 255, 0.5);
-  box-shadow: 0 8px 25px rgba(0, 122, 255, 0.15);
+.history-card.is-mine:hover::before {
+  transform: scale(1);
 }
 
-.card-header { display: flex; justify-content: space-between; align-items: center; z-index: 1; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 1; }
 .card-status {
-  font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem;
-  border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+  font-size: 0.8rem; font-weight: 500; padding: 0.3rem 0.8rem;
+  border-radius: 8px; text-transform: capitalize; letter-spacing: 0.3px;
 }
-.card-status.finished { background-color: rgba(52, 199, 89, 0.15); color: #34C759; }
-.card-status.playing { background-color: rgba(255, 149, 0, 0.15); color: #FF9500; }
+.card-status.finished { background-color: rgba(52, 199, 89, 0.1); color: #28a745; border: 1px solid rgba(52, 199, 89, 0.2); }
+.card-status.playing { background-color: rgba(255, 149, 0, 0.1); color: #fd7e14; border: 1px solid rgba(255, 149, 0, 0.2); }
 
 .delete-btn {
-  background: transparent; border: none; color: #BDBDBD;
-  font-size: 1.1rem; cursor: pointer; transition: color 0.2s ease;
-  padding: 5px; border-radius: 50%;
+  background: transparent; border: none; color: #C0C0C0;
+  font-size: 1.2rem; cursor: pointer; transition: all 0.2s ease;
+  padding: 6px; border-radius: 50%;
 }
 .delete-btn:hover { color: #FF453A; background-color: rgba(255, 69, 58, 0.1); }
 
-.card-content { flex: 1; margin: 1rem 0; overflow: hidden; }
+.card-content { flex: 1; margin: 1.2rem 0; overflow: hidden; }
 .card-summary {
-  font-size: 0.9rem; color: #666666; line-height: 1.6; margin: 0;
-  display: -webkit-box; -webkit-line-clamp: 3;
+  font-size: 0.95rem; color: #555; line-height: 1.65; margin: 0;
+  display: -webkit-box; -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;
 }
 
 .card-footer {
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 0.8rem; color: #999;
-  border-top: 1px solid #F0F0F0;
-  padding-top: 0.8rem;
+  font-size: 0.8rem; color: #AAAAAA;
+  border-top: 1px solid #F5F5F5;
+  padding-top: 1rem;
 }
-.card-id { font-family: monospace; }
+.card-id { font-family: monospace; letter-spacing: -0.5px; }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style> 
