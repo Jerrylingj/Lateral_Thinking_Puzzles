@@ -30,7 +30,7 @@ yarn-error.log*
 .env.local
 .env.*.local
 # 环境配置文件 - 实际配置不提交到版本控制
-/frontend/src/config/env.js
+frontend/src/config/env.js
 
 # IDE相关
 .idea/
