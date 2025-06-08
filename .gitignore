@@ -1,0 +1,65 @@
+# Java后端相关
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Spring Boot配置文件
+**/application-*.yml
+**/application-*.properties
+**/application.yml
+**/application.properties
+*.log
+*.gz
+logs/
+
+# 编译的文件
+*.class
+*.jar
+*.war
+*.ear
+
+# 前端相关
+node_modules/
+/dist/
+/frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env.local
+.env.*.local
+
+# IDE相关
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.classpath
+.project
+.settings/
+.factorypath
+
+# 系统相关
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+*.swp
+
+# 其他
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+.apt_generated
+.apt_generated_test
+
+# 项目特定配置
+/haigui/src/main/resources/application.yml
+/haigui/src/main/resources/application.properties 

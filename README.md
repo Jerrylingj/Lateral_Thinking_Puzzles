@@ -1,6 +1,6 @@
 # 深海回响（Deep Echo）
 
-![横向思维谜题](https://img.shields.io/badge/Lateral%20Thinking-Puzzles-blue)![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.3-brightgreen)![Vue.js](https://img.shields.io/badge/Vue.js-3.2.13-42b883)![Java](https://img.shields.io/badge/Java-17-orange)
+![横向思维谜题](https://img.shields.io/badge/Lateral%20Thinking-Puzzles-blue)  ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.4.3-brightgreen)  ![Vue.js](https://img.shields.io/badge/Vue.js-3.2.13-42b883)  ![Java](https://img.shields.io/badge/Java-17-orange)
 
 ## 📖 概述
 

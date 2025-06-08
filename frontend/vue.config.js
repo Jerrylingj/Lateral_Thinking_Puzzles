@@ -1,16 +1,18 @@
 const { defineConfig } = require('@vue/cli-service')
+const envConfig = require('./src/config/env')
+
 module.exports = defineConfig({
   transpileDependencies: true,
   // 开发服务器配置
   devServer: {
     port: 8080,
-    // 配置代理，解决跨域问题
-    proxy: {
+    // 配置代理，只在本地环境下使用
+    proxy: !envConfig.enableCloud ? {
       '/api': {
-        target: 'http://localhost:3000', // 目标后端服务器地址
-        changeOrigin: true, // 支持跨域
-        ws: true, // 支持 websocket
+        target: envConfig.localApiUrl,
+        changeOrigin: true,
+        ws: true,
       }
-    }
+    } : undefined
   }
 })

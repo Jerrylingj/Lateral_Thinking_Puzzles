@@ -71,15 +71,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { ArrowLeft, Delete, MessageBox, CaretRight, WarningFilled } from '@element-plus/icons-vue';
-import axios from 'axios';
 import { getUserId } from '@/utils/user';
 
 const API_BASE = '/api/chat'; 
 
+const { proxy } = getCurrentInstance();
 const router = useRouter();
 const loading = ref(true);
 const history = ref([]);
@@ -93,7 +93,7 @@ onMounted(async () => {
 const loadHistory = async () => {
   try {
     loading.value = true;
-    const { data } = await axios.get(`${API_BASE}/rooms`);
+    const data = await proxy.$api.get(`${API_BASE}/rooms`);
     
     // Log the raw data from the backend to the browser's console for debugging
     console.log('Received history data from backend:', JSON.stringify(data, null, 2));
@@ -142,7 +142,7 @@ const continueChat = (roomId) => {
 
 const deleteHistory = async (roomId) => {
   try {
-    await axios.delete(`${API_BASE}/rooms/${roomId}`, {
+    await proxy.$api.delete(`${API_BASE}/rooms/${roomId}`, {
       params: { userId: myUserId.value }
     });
     ElMessage.success('删除成功');

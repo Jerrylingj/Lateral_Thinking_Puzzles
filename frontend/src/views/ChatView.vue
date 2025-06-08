@@ -99,14 +99,14 @@
 </template>
 
 <script setup>
-  import { ref, reactive, onMounted, nextTick, watch } from 'vue'
+  import { ref, reactive, onMounted, nextTick, watch, getCurrentInstance } from 'vue'
   import { useRoute } from 'vue-router'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { ArrowLeft, Document, CaretRight, ChatLineSquare, CircleClose, Promotion, SwitchButton } from '@element-plus/icons-vue'
-  import axios from 'axios'
   import { getUserId } from '@/utils/user'
 
   const route = useRoute()
+  const { proxy } = getCurrentInstance()
   
   const API_BASE = '/api/chat'
   
@@ -146,7 +146,7 @@
       await scrollToBottom()
       
       const requestBody = { userId, message: '开始游戏' };
-      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, requestBody)
+      const data = await proxy.$api.post(`${API_BASE}/${roomId}/send`, requestBody)
       
       setTimeout(() => {
         isTyping.value = false
@@ -172,7 +172,7 @@
       await scrollToBottom()
       
       const requestBody = { userId, message: '结束游戏' };
-      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, requestBody)
+      const data = await proxy.$api.post(`${API_BASE}/${roomId}/send`, requestBody)
       
       setTimeout(() => {
         isTyping.value = false
@@ -215,7 +215,7 @@
 
     try {
       const requestBody = { userId, message: messageText };
-      const { data } = await axios.post(`${API_BASE}/${roomId}/send`, requestBody);
+      const data = await proxy.$api.post(`${API_BASE}/${roomId}/send`, requestBody);
       
       setTimeout(() => {
         isTyping.value = false
@@ -244,7 +244,7 @@
   onMounted(async () => {
     try {
       // 尝试获取该房间的历史对话 - 修正：使用正确的历史记录接口
-      const { data } = await axios.get(`${API_BASE}/history`, {
+      const data = await proxy.$api.get(`${API_BASE}/history`, {
         params: { roomId }
       })
       
