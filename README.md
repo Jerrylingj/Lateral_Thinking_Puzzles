@@ -11,7 +11,7 @@
 ## 🛠️ 技术栈
 
 ### 后端
-- **Java 17**
+- **Java 21**
 - **Spring Boot 3.4.3**
 - **MyBatis-Plus**：用于数据库操作的ORM框架
 - **MySQL**：存储聊天室和消息的数据库
@@ -25,11 +25,6 @@
 
 ## 🚀 快速开始
 
-### 前提条件
-- JDK 17+
-- Maven 3.6+
-- Node.js 14+
-- MySQL 8.0+
 
 ### 后端设置
 
@@ -39,7 +34,7 @@
    cd Lateral_Thinking_Puzzles
    ```
 
-2. 设置MySQL数据库：
+2. 创建database `haigui`, 并设置MySQL数据库：
    ```bash
    mysql -u root -p < haigui/init.sql
    ```
