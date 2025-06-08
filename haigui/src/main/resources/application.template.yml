@@ -1,0 +1,31 @@
+# 服务器配置
+server:
+  port: 3000  # 应用服务端口，可根据需要修改
+  servlet:
+    context-path: /api  # API的基础路径前缀
+
+# 数据库配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver  # MySQL驱动类
+    url: jdbc:mysql://localhost:3306/haigui?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai  # 数据库连接URL，替换localhost为你的数据库服务器地址，haigui为数据库名
+    username: your_username  # 替换为你的数据库用户名
+    password: your_password  # 替换为你的数据库密码
+  profiles:
+    active: local  # 激活的配置文件，可选值：local, dev, prod等
+
+# AI配置
+ai:
+  apiKey: your_api_key  # 替换为你的AI服务API密钥
+
+# 接口文档配置
+knife4j:
+  enable: true  # 是否启用Knife4j接口文档
+  openapi:
+    title: 接口文档  # 文档标题
+    group:
+      default:
+        group-name: 默认分组  # 文档分组名称
+        api-rule: package  # API规则类型
+        api-rule-resources:  # 需要生成文档的包路径
+          - com.haigui.haigui.controller 
