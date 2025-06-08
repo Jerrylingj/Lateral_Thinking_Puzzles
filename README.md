@@ -73,7 +73,30 @@
    npm install
    ```
 
-3. 启动开发服务器：
+3. 配置环境：
+   - 在`frontend/src/config`目录下复制`env.template.js`为`env.js`
+   - 根据实际情况修改配置项
+   ```bash
+   # 在frontend/src/config目录下执行
+   cp env.template.js env.js
+   # 然后编辑env.js文件设置你的配置
+   ```
+   
+   配置文件说明：
+   ```javascript
+   module.exports = {
+       // 是否启用云端环境（true=使用云端API，false=使用本地API）
+       enableCloud: false,
+       
+       // 本地环境API地址，默认为http://localhost:3000
+       localApiUrl: 'http://localhost:3000',
+       
+       // 云端环境API地址，请填写您的实际域名
+       cloudApiUrl: 'http://your-domain.com'
+   }
+   ```
+
+4. 启动开发服务器：
    ```bash
    npm run serve
    ```
@@ -101,6 +124,7 @@ Lateral_Thinking_Puzzles/
 │   ├── src/
 │   │   ├── assets/          # 图片、字体等
 │   │   ├── components/      # Vue组件
+│   │   ├── config/          # 环境配置文件
 │   │   ├── router/          # Vue Router配置
 │   │   ├── utils/           # 工具函数
 │   │   ├── views/           # 页面组件
